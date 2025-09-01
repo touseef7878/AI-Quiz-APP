@@ -128,27 +128,6 @@ The application uses SQLite. The database schema is defined by SQLAlchemy models
 3. **Styling**: Edit `static/css/style.css` for custom styling
 4. **Database Changes**: Update `models.py` and create migration scripts
 
-## 🛠️ API Endpoints
-
-### Authentication
-- `POST /auth/register` - User registration
-- `POST /auth/login` - User login
-- `GET /auth/logout` - User logout
-- `GET /auth/profile` - User profile
-
-### Quiz Management
-- `POST /quiz/create` - Create new quiz
-- `GET /quiz/take/<id>` - Take quiz by ID
-- `GET /quiz/api/quiz/<id>` - Get quiz questions (API)
-- `POST /quiz/api/quiz/<id>/submit` - Submit quiz answers
-- `GET /quiz/results/<id>` - View quiz results
-- `GET /quiz/history` - User quiz history
-
-### Main Pages
-- `GET /` - Homepage
-- `GET /dashboard` - User dashboard
-- `GET /about` - About page
-
 ## 🎨 Technologies Used
 
 ### Backend
@@ -169,116 +148,6 @@ The application uses SQLite. The database schema is defined by SQLAlchemy models
 ### Database
 - **SQLite** - Primary database
 
-## 🔒 Security Features
-
-- Password hashing using Werkzeug
-- CSRF protection with Flask-WTF
-- SQL injection prevention with SQLAlchemy ORM
-- Session management with Flask-Login
-- Input validation and sanitization
-- Rate limiting for API endpoints
-
-## 🚀 Deployment
-
-### Local Development
-```bash
-# Set Flask environment
-export FLASK_ENV=development  # Linux/Mac
-set FLASK_ENV=development     # Windows
-
-# Run with debug mode
-python app.py
-```
-
-### Production Deployment
-
-1. **Set production environment**
-   ```bash
-   export FLASK_ENV=production
-   ```
-
-2. **Use a production WSGI server**
-   ```bash
-   pip install gunicorn
-   gunicorn -w 4 -b 0.0.0.0:5000 app:app
-   ```
-
-3. **Setup reverse proxy (Nginx)**
-   ```nginx
-   server {
-       listen 80;
-       server_name your-domain.com;
-       
-       location / {
-           proxy_pass http://127.0.0.1:5000;
-           proxy_set_header Host $host;
-           proxy_set_header X-Real-IP $remote_addr;
-       }
-   }
-   ```
-
-## 📝 Development
-
-### Adding New Features
-
-1. **Database Changes**
-   - Update `models.py`
-   - Create migration scripts
-
-2. **New Routes**
-   - Add routes to appropriate blueprint in `routes/`
-   - Create corresponding templates
-   - Update navigation if needed
-
-3. **Frontend Changes**
-   - Update templates in `templates/`
-   - Add styles to `static/css/style.css`
-   - Add JavaScript to `static/js/`
-
-### Testing
-
-```bash
-# Run basic functionality tests
-python -m pytest tests/ -v
-
-# Test database connections
-python -c "from models import db; print('DB connection successful!')"
-
-# Test AI service
-python -c "from ai_service import AIQuizGenerator; print('AI service available!')"
-```
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-1. **Database Connection Failed**
-   - Ensure the `instance/site.db` file is not corrupted or locked.
-   - Verify that the application has write permissions to the `instance/` directory.
-
-2. **AI Generation Not Working**
-   - Verify Google Gemini API key in `.env`
-   - Check API rate limits
-   - Test with a simple topic first
-
-3. **Import Errors**
-   - Ensure virtual environment is activated
-   - Install all requirements: `pip install -r requirements.txt`
-   - Check Python version compatibility
-
-4. **Template Not Found**
-   - Verify template files exist in correct directories
-   - Check template inheritance and paths
-   - Ensure Flask can find template directory
-
-### Logging
-
-Enable detailed logging by adding to your `.env`:
-```env
-FLASK_DEBUG=True
-LOG_LEVEL=DEBUG
-```
-
 ## 🤝 Contributing
 
 1. Fork the repository
@@ -287,17 +156,6 @@ LOG_LEVEL=DEBUG
 4. Commit your changes: `git commit -m 'Add feature-name'`
 5. Push to the branch: `git push origin feature-name`
 6. Submit a pull request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- Google for providing the Gemini API
-- Flask team for the excellent web framework
-- Bootstrap team for the responsive framework
-- Font Awesome for the icon library
 
 ## 📞 Support
 
