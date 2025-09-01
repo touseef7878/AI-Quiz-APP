@@ -1,0 +1,316 @@
+{% extends "base.html" %}
+
+{% block title %}Take Quiz: {{ quiz.topic }} - AI Quiz App{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <!-- Quiz Header -->
+        <div class="card shadow mb-4">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="mb-1">{{ quiz.topic }}</h2>
+                        <span class="badge bg-{{ 'success' if quiz.difficulty == 'simple' else 'warning' if quiz.difficulty == 'medium' else 'danger' }} fs-6">
+                            {{ quiz.difficulty.title() }} Level
+                        </span>
+                    </div>
+                    <div class="text-end">
+                        <div class="h4 mb-0" id="timer">00:00</div>
+                        <small class="text-muted">Time Elapsed</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="card mb-4">
+            <div class="card-body py-2">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="fw-medium">Progress</span>
+                    <span id="progressText">0 / {{ questions|length }}</span>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz Form -->
+        <form id="quizForm">
+            {% for question in questions %}
+            <div class="card mb-4 question-card" data-question-id="{{ question.id }}">
+                <div class="card-body">
+                    <div class="d-flex align-items-start mb-3">
+                        <span class="badge bg-primary me-3 fs-6">{{ question.question_number }}</span>
+                        <h5 class="mb-0">{{ question.question_text }}</h5>
+                    </div>
+                    
+                    <div class="options-container">
+                        {% for option_key, option_text in question.options.items() %}
+                        <div class="form-check mb-2 option-item">
+                            <input class="form-check-input" type="radio" 
+                                   name="question_{{ question.id }}" 
+                                   id="q{{ question.id }}_{{ option_key }}" 
+                                   value="{{ option_key }}"
+                                   data-question-id="{{ question.id }}">
+                            <label class="form-check-label w-100" for="q{{ question.id }}_{{ option_key }}">
+                                <strong>{{ option_key }}.</strong> {{ option_text }}
+                            </label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- Submit Button -->
+            <div class="card">
+                <div class="card-body text-center">
+                    <button type="submit" class="btn btn-success btn-lg" id="submitBtn" disabled>
+                        <i class="fas fa-check me-2"></i>Submit Quiz
+                    </button>
+                    <div class="mt-2">
+                        <small class="text-muted">Make sure you've answered all questions before submitting</small>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Results Modal -->
+<div class="modal fade" id="resultsModal" tabindex="-1" data-bs-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-chart-line me-2"></i>Quiz Results
+                </h5>
+            </div>
+            <div class="modal-body" id="resultsContent">
+                <!-- Results will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+                <a href="{{ url_for('quiz.create_quiz') }}" class="btn btn-primary">Take Another Quiz</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let startTime = Date.now();
+let answeredQuestions = new Set();
+let totalQuestions = {{ questions|length }};
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Start timer
+    updateTimer();
+    setInterval(updateTimer, 1000);
+    
+    // Handle option selection
+    document.querySelectorAll('input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const questionId = this.dataset.questionId;
+            answeredQuestions.add(questionId);
+            updateProgress();
+            
+            // Visual feedback for selected option
+            const questionCard = this.closest('.question-card');
+            questionCard.classList.add('answered');
+        });
+    });
+    
+    // Handle form submission
+    document.getElementById('quizForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (answeredQuestions.size < totalQuestions) {
+            alert(`Please answer all ${totalQuestions} questions before submitting.`);
+            return;
+        }
+        
+        submitQuiz();
+    });
+});
+
+function updateTimer() {
+    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+    const minutes = Math.floor(elapsed / 60);
+    const seconds = elapsed % 60;
+    document.getElementById('timer').textContent = 
+        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+function updateProgress() {
+    const progress = (answeredQuestions.size / totalQuestions) * 100;
+    document.getElementById('progressBar').style.width = progress + '%';
+    document.getElementById('progressText').textContent = `${answeredQuestions.size} / ${totalQuestions}`;
+    
+    // Enable submit button when all questions are answered
+    const submitBtn = document.getElementById('submitBtn');
+    if (answeredQuestions.size === totalQuestions) {
+        submitBtn.disabled = false;
+        submitBtn.classList.add('pulse');
+    } else {
+        submitBtn.disabled = true;
+        submitBtn.classList.remove('pulse');
+    }
+}
+
+async function submitQuiz() {
+    const submitBtn = document.getElementById('submitBtn');
+    const originalText = submitBtn.innerHTML;
+    
+    // Show loading state
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
+    submitBtn.disabled = true;
+    
+    // Collect answers
+    const answers = {};
+    document.querySelectorAll('input[type="radio"]:checked').forEach(radio => {
+        const questionId = radio.dataset.questionId;
+        answers[questionId] = radio.value;
+    });
+    
+    try {
+        const response = await fetch(`/quiz/api/quiz/{{ quiz.id }}/submit`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ answers: answers })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            showResults(data);
+        } else {
+            alert('Error: ' + data.message);
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    } catch (error) {
+        console.error('Error submitting quiz:', error);
+        alert('Failed to submit quiz. Please try again.');
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    }
+}
+
+function showResults(data) {
+    const resultsContent = document.getElementById('resultsContent');
+    
+    // Calculate percentage and grade
+    const percentage = data.percentage;
+    let grade = 'F';
+    let gradeClass = 'danger';
+    
+    if (percentage >= 90) { grade = 'A+'; gradeClass = 'success'; }
+    else if (percentage >= 80) { grade = 'A'; gradeClass = 'success'; }
+    else if (percentage >= 70) { grade = 'B'; gradeClass = 'info'; }
+    else if (percentage >= 60) { grade = 'C'; gradeClass = 'warning'; }
+    else if (percentage >= 50) { grade = 'D'; gradeClass = 'warning'; }
+    
+    let resultsHtml = `
+        <div class="text-center mb-4">
+            <div class="score-circle bg-${gradeClass} text-white d-inline-flex align-items-center justify-content-center mb-3">
+                <span class="h2 mb-0">${data.score}/10</span>
+            </div>
+            <h4>Score: ${data.score} out of ${data.total_questions}</h4>
+            <h5 class="text-${gradeClass}">Grade: ${grade} (${percentage}%)</h5>
+        </div>
+        
+        <div class="results-breakdown">
+            <h6 class="mb-3">Question Breakdown:</h6>
+    `;
+    
+    data.results.forEach(result => {
+        const isCorrect = result.is_correct;
+        const statusIcon = isCorrect ? 'fa-check-circle text-success' : 'fa-times-circle text-danger';
+        const statusClass = isCorrect ? 'border-success' : 'border-danger';
+        
+        resultsHtml += `
+            <div class="card mb-3 ${statusClass}" style="border-width: 2px;">
+                <div class="card-body">
+                    <div class="d-flex align-items-start mb-2">
+                        <i class="fas ${statusIcon} me-2 mt-1"></i>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-2">Question ${result.question_number}: ${result.question_text}</h6>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong>Your Answer:</strong> 
+                                    <span class="text-${isCorrect ? 'success' : 'danger'}">
+                                        ${result.user_answer || 'Not answered'}: ${result.options[result.user_answer] || 'N/A'}
+                                    </span>
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Correct Answer:</strong> 
+                                    <span class="text-success">
+                                        ${result.correct_answer}: ${result.options[result.correct_answer]}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    resultsHtml += '</div>';
+    resultsContent.innerHTML = resultsHtml;
+    
+    // Show the modal
+    const modal = new bootstrap.Modal(document.getElementById('resultsModal'));
+    modal.show();
+}
+</script>
+
+<style>
+.question-card {
+    transition: all 0.3s ease;
+}
+
+.question-card.answered {
+    border-left: 4px solid #28a745;
+}
+
+.option-item {
+    transition: background-color 0.2s ease;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.option-item:hover {
+    background-color: #f8f9fa;
+}
+
+.form-check-input:checked ~ .form-check-label {
+    background-color: #e3f2fd;
+    border-radius: 5px;
+}
+
+.pulse {
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.score-circle {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+}
+</style>
+{% endblock %}

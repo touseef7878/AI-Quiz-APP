@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block title %}Register - AI Quiz App{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <i class="fas fa-user-plus fa-3x text-primary mb-3"></i>
+                    <h2>Join AI Quiz App</h2>
+                    <p class="text-muted">Create your account and start learning!</p>
+                </div>
+
+                <form id="registerForm" method="POST">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                            <input type="text" class="form-control" id="username" name="username" required minlength="3">
+                        </div>
+                        <div class="form-text">At least 3 characters</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email Address</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                            <input type="password" class="form-control" id="password" name="password" required minlength="6">
+                            <button type="button" class="btn btn-outline-secondary" id="togglePassword">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="form-text">At least 6 characters</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">Confirm Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                            <input type="password" class="form-control" id="confirmPassword" required>
+                        </div>
+                    </div>
+
+                    <div class="d-grid mb-3">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-user-plus me-2"></i>Create Account
+                        </button>
+                    </div>
+                </form>
+
+                <hr>
+
+                <div class="text-center">
+                    <p class="mb-0">Already have an account? 
+                        <a href="{{ url_for('auth.login') }}" class="text-primary text-decoration-none">
+                            Sign in here
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Toggle password visibility
+    const togglePassword = document.getElementById('togglePassword');
+    const passwordInput = document.getElementById('password');
+    
+    togglePassword.addEventListener('click', function() {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        
+        const icon = this.querySelector('i');
+        icon.classList.toggle('fa-eye');
+        icon.classList.toggle('fa-eye-slash');
+    });
+
+    // Form validation
+    const form = document.getElementById('registerForm');
+    form.addEventListener('submit', function(e) {
+        const username = document.getElementById('username').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        
+        // Clear previous error states
+        clearErrorStates();
+        
+        let hasErrors = false;
+        
+        if (!username || username.length < 3) {
+            setFieldError('username', 'Username must be at least 3 characters long');
+            hasErrors = true;
+        }
+        
+        if (!email || !isValidEmail(email)) {
+            setFieldError('email', 'Please enter a valid email address');
+            hasErrors = true;
+        }
+        
+        if (!password || password.length < 6) {
+            setFieldError('password', 'Password must be at least 6 characters long');
+            hasErrors = true;
+        }
+        
+        if (password !== confirmPassword) {
+            setFieldError('confirmPassword', 'Passwords do not match');
+            hasErrors = true;
+        }
+        
+        if (hasErrors) {
+            e.preventDefault();
+            showAlert('Please fix the errors below', 'danger');
+        }
+    });
+});
+
+function isValidEmail(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
+function setFieldError(fieldId, message) {
+    const field = document.getElementById(fieldId);
+    field.classList.add('is-invalid');
+    
+    // Remove existing feedback
+    const existingFeedback = field.parentNode.parentNode.querySelector('.invalid-feedback');
+    if (existingFeedback) {
+        existingFeedback.remove();
+    }
+    
+    // Add error message
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'invalid-feedback';
+    errorDiv.textContent = message;
+    field.parentNode.parentNode.appendChild(errorDiv);
+}
+
+function clearErrorStates() {
+    const fields = ['username', 'email', 'password', 'confirmPassword'];
+    fields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        field.classList.remove('is-invalid');
+        
+        const feedback = field.parentNode.parentNode.querySelector('.invalid-feedback');
+        if (feedback) {
+            feedback.remove();
+        }
+    });
+}
+
+function showAlert(message, type) {
+    const alertContainer = document.createElement('div');
+    alertContainer.innerHTML = `
+        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    const form = document.getElementById('registerForm');
+    form.parentNode.insertBefore(alertContainer, form);
+    
+    // Auto dismiss after 5 seconds
+    setTimeout(() => {
+        const alert = alertContainer.querySelector('.alert');
+        if (alert) {
+            const bsAlert = new bootstrap.Alert(alert);
+            bsAlert.close();
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}

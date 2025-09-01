@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}Quiz History - AI Quiz App{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1><i class="fas fa-history me-2"></i>Your Quiz History</h1>
+                <p class="text-muted mb-0">Track your learning progress over time</p>
+            </div>
+            <a href="{{ url_for('quiz.create_quiz') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Create New Quiz
+            </a>
+        </div>
+    </div>
+</div>
+
+{% if results %}
+    <!-- Summary Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card bg-primary text-white text-center">
+                <div class="card-body">
+                    <i class="fas fa-clipboard-list fa-2x mb-2"></i>
+                    <h4>{{ results|length }}</h4>
+                    <small>Total Quizzes</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-success text-white text-center">
+                <div class="card-body">
+                    <i class="fas fa-star fa-2x mb-2"></i>
+                    <h4>{{ (results|map(attribute='score')|sum / results|length)|round(1) }}/10</h4>
+                    <small>Average Score</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-warning text-white text-center">
+                <div class="card-body">
+                    <i class="fas fa-trophy fa-2x mb-2"></i>
+                    <h4>{{ results|map(attribute='score')|max }}/10</h4>
+                    <small>Best Score</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card bg-info text-white text-center">
+                <div class="card-body">
+                    <i class="fas fa-chart-line fa-2x mb-2"></i>
+                    <h4>{{ results|map(attribute='score')|sum }}</h4>
+                    <small>Total Points</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quiz History Table -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-table me-2"></i>All Quiz Results</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Date</th>
+                            <th>Topic</th>
+                            <th>Difficulty</th>
+                            <th>Score</th>
+                            <th>Percentage</th>
+                            <th>Grade</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in results %}
+                        {% set percentage = (result.score / 10) * 100 %}
+                        <tr>
+                            <td>
+                                <div>{{ result.taken_at.strftime('%b %d, %Y') }}</div>
+                                <small class="text-muted">{{ result.taken_at.strftime('%I:%M %p') }}</small>
+                            </td>
+                            <td>
+                                <strong>{{ result.quiz.topic }}</strong>
+                            </td>
+                            <td>
+                                <span class="badge bg-{{ 'success' if result.quiz.difficulty == 'simple' else 'warning' if result.quiz.difficulty == 'medium' else 'danger' }}">
+                                    {{ result.quiz.difficulty.title() }}
+                                </span>
+                            </td>
+                            <td>
+                                <strong class="text-{{ 'success' if result.score >= 7 else 'warning' if result.score >= 5 else 'danger' }}">
+                                    {{ result.score }}/10
+                                </strong>
+                            </td>
+                            <td>
+                                <div class="progress" style="height: 20px;">
+                                    <div class="progress-bar bg-{{ 'success' if percentage >= 70 else 'warning' if percentage >= 50 else 'danger' }}" 
+                                         style="width: {{ percentage }}%">
+                                        {{ percentage|round(1) }}%
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-{{ 'success' if percentage >= 70 else 'warning' if percentage >= 50 else 'danger' }}">
+                                    {% if percentage >= 90 %}A+
+                                    {% elif percentage >= 80 %}A
+                                    {% elif percentage >= 70 %}B
+                                    {% elif percentage >= 60 %}C
+                                    {% elif percentage >= 50 %}D
+                                    {% else %}F
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <a href="{{ url_for('quiz.view_results', result_id=result.id) }}" 
+                                       class="btn btn-outline-info" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ url_for('quiz.take_quiz', quiz_id=result.quiz_id) }}" 
+                                       class="btn btn-outline-primary" title="Retake Quiz">
+                                        <i class="fas fa-redo"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+{% else %}
+    <!-- Empty State -->
+    <div class="text-center py-5">
+        <div class="card">
+            <div class="card-body py-5">
+                <i class="fas fa-clipboard-list fa-4x text-muted mb-4"></i>
+                <h3 class="text-muted">No quiz history yet</h3>
+                <p class="text-muted mb-4">You haven't taken any quizzes yet. Start your learning journey now!</p>
+                <a href="{{ url_for('quiz.create_quiz') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-plus me-2"></i>Create Your First Quiz
+                </a>
+            </div>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add sorting functionality to table
+    const table = document.querySelector('table');
+    if (table) {
+        // Add click handlers to sortable headers
+        const headers = table.querySelectorAll('th');
+        headers.forEach((header, index) => {
+            if (index < 6) { // Make first 6 columns sortable
+                header.style.cursor = 'pointer';
+                header.addEventListener('click', () => sortTable(index));
+            }
+        });
+    }
+});
+
+function sortTable(columnIndex) {
+    const table = document.querySelector('table');
+    const tbody = table.querySelector('tbody');
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    
+    const isNumeric = columnIndex === 3 || columnIndex === 4; // Score and Percentage columns
+    const isDate = columnIndex === 0; // Date column
+    
+    rows.sort((a, b) => {
+        let aValue = a.cells[columnIndex].textContent.trim();
+        let bValue = b.cells[columnIndex].textContent.trim();
+        
+        if (isDate) {
+            aValue = new Date(aValue);
+            bValue = new Date(bValue);
+            return bValue - aValue; // Most recent first
+        } else if (isNumeric) {
+            aValue = parseFloat(aValue.replace(/[^\d.]/g, ''));
+            bValue = parseFloat(bValue.replace(/[^\d.]/g, ''));
+            return bValue - aValue; // Highest first
+        } else {
+            return aValue.localeCompare(bValue);
+        }
+    });
+    
+    // Re-append sorted rows
+    rows.forEach(row => tbody.appendChild(row));
+}
+</script>
+{% endblock %}
