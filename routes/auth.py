@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
 from models import User, db
+from sqlalchemy import or_
 from werkzeug.security import check_password_hash
 
 auth_bp = Blueprint('auth', __name__)
@@ -13,13 +14,13 @@ def login():
     if request.method == 'POST':
         if request.is_json:
             data = request.get_json()
-            email = data.get('email')
+            identifier = data.get('identifier')
             password = data.get('password')
         else:
-            email = request.form.get('email')
+            identifier = request.form.get('identifier')
             password = request.form.get('password')
         
-        user = User.query.filter_by(email=email).first()
+        user = User.query.filter(or_(User.username == identifier, User.email == identifier)).first()
         
         if user and user.check_password(password):
             login_user(user, remember=True)
@@ -29,8 +30,8 @@ def login():
             return redirect(url_for('main.dashboard'))
         else:
             if request.is_json:
-                return jsonify({'success': False, 'message': 'Invalid email or password'}), 401
-            flash('Invalid email or password', 'error')
+                return jsonify({'success': False, 'message': 'Invalid username/email or password'}), 401
+            flash('Invalid username/email or password', 'error')
     
     return render_template('auth/login.html')
 

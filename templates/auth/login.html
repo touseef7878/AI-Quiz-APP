@@ -15,10 +15,10 @@
 
                 <form id="loginForm" method="POST">
                     <div class="mb-3">
-                        <label for="email" class="form-label">Email Address</label>
+                        <label for="identifier" class="form-label">Username or Email</label>
                         <div class="input-group">
-                            <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                            <input type="email" class="form-control" id="email" name="email" required>
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                            <input type="text" class="form-control" id="identifier" name="identifier" required>
                         </div>
                     </div>
 
@@ -74,27 +74,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // Form validation
     const form = document.getElementById('loginForm');
     form.addEventListener('submit', function(e) {
-        const email = document.getElementById('email').value;
+        const identifier = document.getElementById('identifier').value;
         const password = document.getElementById('password').value;
         
-        if (!email || !password) {
+        if (!identifier || !password) {
             e.preventDefault();
             window.QuizApp.showAlert('Please fill in all fields', 'danger');
             return;
         }
-        
-        if (!isValidEmail(email)) {
-            e.preventDefault();
-            showAlert('Please enter a valid email address', 'danger');
-            return;
-        }
     });
 });
-
-function isValidEmail(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-}
 
 function showAlert(message, type) {
     const alertContainer = document.createElement('div');
