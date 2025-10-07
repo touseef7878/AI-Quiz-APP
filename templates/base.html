@@ -10,13 +10,14 @@
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <!-- Custom CSS -->
-    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/modern.css') }}" rel="stylesheet">
     
     {% block extra_head %}{% endblock %}
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('main.index') }}">
                 <i class="fas fa-brain me-2"></i>AI Quiz App
@@ -30,25 +31,17 @@
                 <ul class="navbar-nav me-auto">
                     {% if current_user.is_authenticated %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('main.dashboard') }}">
-                                <i class="fas fa-tachometer-alt me-1"></i>Dashboard
-                            </a>
+                            <a class="nav-link" href="{{ url_for('main.dashboard') }}">Dashboard</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('quiz.create_quiz') }}">
-                                <i class="fas fa-plus me-1"></i>Create Quiz
-                            </a>
+                            <a class="nav-link" href="{{ url_for('quiz.create_quiz') }}">Create Quiz</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('quiz.quiz_history') }}">
-                                <i class="fas fa-history me-1"></i>History
-                            </a>
+                            <a class="nav-link" href="{{ url_for('quiz.quiz_history') }}">History</a>
                         </li>
                     {% endif %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('main.about') }}">
-                            <i class="fas fa-info-circle me-1"></i>About
-                        </a>
+                        <a class="nav-link" href="{{ url_for('main.about') }}">About</a>
                     </li>
                 </ul>
                 
@@ -56,28 +49,20 @@
                     {% if current_user.is_authenticated %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-user me-1"></i>{{ current_user.username }}
+                                {{ current_user.username }}
                             </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}">
-                                    <i class="fas fa-user-circle me-1"></i>Profile
-                                </a></li>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}">Profile</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">
-                                    <i class="fas fa-sign-out-alt me-1"></i>Logout
-                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">Logout</a></li>
                             </ul>
                         </li>
                     {% else %}
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('auth.login') }}">
-                                <i class="fas fa-sign-in-alt me-1"></i>Login
-                            </a>
+                            <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('auth.register') }}">
-                                <i class="fas fa-user-plus me-1"></i>Register
-                            </a>
+                            <a class="btn btn-primary" href="{{ url_for('auth.register') }}">Register</a>
                         </li>
                     {% endif %}
                 </ul>
@@ -105,18 +90,10 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-dark text-light py-4 mt-5">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <h5><i class="fas fa-brain me-2"></i>AI Quiz App</h5>
-                    <p class="mb-0">Test your knowledge with AI-generated quizzes on any topic!</p>
-                </div>
-                <div class="col-md-6 text-md-end">
-                    <p class="mb-0">&copy; 2024 AI Quiz App. All rights reserved.</p>
-                    <small class="text-muted">Powered by AI & Flask</small>
-                </div>
-            </div>
+    <footer class="py-4 mt-5">
+        <div class="container text-center">
+            <p class="mb-0">&copy; 2024 AI Quiz App. All rights reserved.</p>
+            <small class="text-muted">Designed with <i class="fas fa-heart text-danger"></i> by Gemini</small>
         </div>
     </footer>
 

@@ -5,54 +5,48 @@
 {% block content %}
 <div class="row">
     <div class="col-lg-4 mb-4">
-        <!-- User Info Card -->
-        <div class="card">
-            <div class="card-body text-center">
-                <div class="profile-avatar mb-3">
-                    <i class="fas fa-user-circle fa-5x text-primary"></i>
-                </div>
-                <h4>{{ current_user.username }}</h4>
+        <div class="card border-0 shadow-lg text-center fade-in-up">
+            <div class="card-body">
+                <img src="https://i.pravatar.cc/150?u={{ current_user.username }}" alt="User Avatar" class="rounded-circle mb-3" width="120">
+                <h4 class="fw-bold">{{ current_user.username }}</h4>
                 <p class="text-muted">{{ current_user.email }}</p>
-                <small class="text-muted">
-                    Member since {{ current_user.created_at.strftime('%B %Y') }}
-                </small>
+                <p class="text-muted"><small>Member since {{ current_user.created_at.strftime('%B %Y') }}</small></p>
             </div>
         </div>
     </div>
 
     <div class="col-lg-8">
-        <!-- Statistics Overview -->
-        <div class="card mb-4">
-            <div class="card-header">
+        <div class="card border-0 shadow-lg fade-in-up mb-4">
+            <div class="card-header bg-transparent">
                 <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Your Statistics</h5>
             </div>
             <div class="card-body">
                 <div class="row text-center">
                     <div class="col-md-3 mb-3">
-                        <div class="stat-box p-3">
+                        <div class="p-3">
                             <i class="fas fa-clipboard-list fa-2x text-primary mb-2"></i>
-                            <div class="h3">{{ stats.total_quizzes }}</div>
+                            <div class="h3 fw-bold">{{ stats.total_quizzes }}</div>
                             <div class="text-muted">Total Quizzes</div>
                         </div>
                     </div>
                     <div class="col-md-3 mb-3">
-                        <div class="stat-box p-3">
+                        <div class="p-3">
                             <i class="fas fa-star fa-2x text-success mb-2"></i>
-                            <div class="h3">{{ stats.average_score }}/10</div>
+                            <div class="h3 fw-bold">{{ stats.average_score }}/10</div>
                             <div class="text-muted">Average Score</div>
                         </div>
                     </div>
                     <div class="col-md-3 mb-3">
-                        <div class="stat-box p-3">
+                        <div class="p-3">
                             <i class="fas fa-trophy fa-2x text-warning mb-2"></i>
-                            <div class="h3">{{ stats.best_score }}/10</div>
+                            <div class="h3 fw-bold">{{ stats.best_score }}/10</div>
                             <div class="text-muted">Best Score</div>
                         </div>
                     </div>
                     <div class="col-md-3 mb-3">
-                        <div class="stat-box p-3">
+                        <div class="p-3">
                             <i class="fas fa-percentage fa-2x text-info mb-2"></i>
-                            <div class="h3">{{ ((stats.average_score / 10) * 100)|round(1) }}%</div>
+                            <div class="h3 fw-bold">{{ ((stats.average_score / 10) * 100)|round(1) }}%</div>
                             <div class="text-muted">Success Rate</div>
                         </div>
                     </div>
@@ -60,21 +54,15 @@
             </div>
         </div>
 
-        <!-- Recent Activity -->
         {% if stats.recent_results %}
-        <div class="card">
-            <div class="card-header">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-history me-2"></i>Recent Activity</h5>
-                    <a href="{{ url_for('quiz.quiz_history') }}" class="btn btn-sm btn-outline-primary">
-                        View All History
-                    </a>
-                </div>
+        <div class="card border-0 shadow-lg fade-in-up">
+            <div class="card-header bg-transparent">
+                <h5 class="mb-0"><i class="fas fa-history me-2"></i>Recent Activity</h5>
             </div>
             <div class="card-body">
                 {% for result in stats.recent_results %}
-                <div class="activity-item d-flex align-items-center py-3 {% if not loop.last %}border-bottom{% endif %}">
-                    <div class="activity-icon me-3">
+                <div class="d-flex align-items-center py-3 {% if not loop.last %}border-bottom{% endif %}">
+                    <div class="me-3">
                         <i class="fas fa-clipboard-check fa-2x text-{{ 'success' if result.score >= 7 else 'warning' if result.score >= 5 else 'danger' }}"></i>
                     </div>
                     <div class="flex-grow-1">
@@ -90,76 +78,22 @@
                         <small class="text-muted">{{ result.taken_at[:10] }}</small>
                     </div>
                     <div>
-                        <a href="{{ url_for('quiz.view_results', result_id=result.id) }}" class="btn btn-sm btn-outline-info">
-                            <i class="fas fa-eye"></i>
-                        </a>
+                        <a href="{{ url_for('quiz.view_results', result_id=result.id) }}" class="btn btn-sm btn-outline-info">View</a>
                     </div>
                 </div>
                 {% endfor %}
             </div>
         </div>
         {% else %}
-        <div class="card">
+        <div class="card border-0 shadow-lg fade-in-up">
             <div class="card-body text-center py-5">
                 <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
                 <h5 class="text-muted">No quiz activity yet</h5>
                 <p class="text-muted">Start taking quizzes to see your activity here!</p>
-                <a href="{{ url_for('quiz.create_quiz') }}" class="btn btn-primary">
-                    <i class="fas fa-plus me-2"></i>Create Your First Quiz
-                </a>
+                <a href="{{ url_for('quiz.create_quiz') }}" class="btn btn-primary">Create Your First Quiz</a>
             </div>
         </div>
         {% endif %}
     </div>
 </div>
-{% endblock %}
-
-{% block scripts %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Add some interactive effects
-    const statBoxes = document.querySelectorAll('.stat-box');
-    statBoxes.forEach(box => {
-        box.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-5px)';
-            this.style.transition = 'transform 0.3s ease';
-        });
-        
-        box.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0)';
-        });
-    });
-});
-</script>
-
-<style>
-.profile-avatar {
-    animation: fadeIn 1s ease-in;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: scale(0.8); }
-    to { opacity: 1; transform: scale(1); }
-}
-
-.stat-box {
-    border-radius: 10px;
-    transition: all 0.3s ease;
-    cursor: pointer;
-}
-
-.stat-box:hover {
-    background-color: #f8f9fa;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-.activity-item {
-    transition: background-color 0.3s ease;
-}
-
-.activity-item:hover {
-    background-color: #f8f9fa;
-    border-radius: 5px;
-}
-</style>
 {% endblock %}

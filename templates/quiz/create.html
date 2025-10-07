@@ -4,35 +4,29 @@
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-md-8 col-lg-6">
-        <div class="card shadow">
+    <div class="col-md-8 col-lg-7">
+        <div class="card border-0 shadow-lg fade-in-up">
             <div class="card-body p-5">
                 <div class="text-center mb-4">
                     <i class="fas fa-brain fa-3x text-primary mb-3"></i>
-                    <h2>Create AI Quiz</h2>
-                    <p class="text-muted">Choose a topic and difficulty level for your personalized quiz</p>
+                    <h2 class="fw-bold">Create Your AI Quiz</h2>
+                    <p class="text-muted">Let our AI generate a personalized quiz for you.</p>
                 </div>
 
                 <form id="createQuizForm" method="POST">
                     <div class="mb-4">
-                        <label for="topic" class="form-label h5">What topic would you like to be quizzed on?</label>
-                        <div class="input-group input-group-lg">
-                            <span class="input-group-text"><i class="fas fa-lightbulb"></i></span>
-                            <input type="text" class="form-control" id="topic" name="topic" 
-                                   placeholder="e.g., World History, Python Programming, Biology..." required>
-                        </div>
-                        <div class="form-text">Enter any subject or topic you'd like to learn about</div>
+                        <label for="topic" class="form-label h5">Topic</label>
+                        <input type="text" class="form-control form-control-lg" id="topic" name="topic" placeholder="e.g., World History, Python Programming..." required>
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label h5">Select Difficulty Level</label>
+                        <label class="form-label h5">Difficulty</label>
                         <div class="row">
                             <div class="col-md-4 mb-2">
                                 <input type="radio" class="btn-check" name="difficulty" id="simple" value="simple" checked>
                                 <label class="btn btn-outline-success w-100 py-3" for="simple">
                                     <i class="fas fa-smile fa-2x d-block mb-2"></i>
                                     <strong>Simple</strong>
-                                    <br><small>Basic level</small>
                                 </label>
                             </div>
                             <div class="col-md-4 mb-2">
@@ -40,7 +34,6 @@
                                 <label class="btn btn-outline-warning w-100 py-3" for="medium">
                                     <i class="fas fa-meh fa-2x d-block mb-2"></i>
                                     <strong>Medium</strong>
-                                    <br><small>Intermediate</small>
                                 </label>
                             </div>
                             <div class="col-md-4 mb-2">
@@ -48,64 +41,15 @@
                                 <label class="btn btn-outline-danger w-100 py-3" for="hard">
                                     <i class="fas fa-fire fa-2x d-block mb-2"></i>
                                     <strong>Hard</strong>
-                                    <br><small>Advanced</small>
                                 </label>
                             </div>
                         </div>
                     </div>
 
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle me-2"></i>
-                        <strong>What to expect:</strong>
-                        <ul class="mb-0 mt-2">
-                            <li>10 multiple-choice questions</li>
-                            <li>4 options per question</li>
-                            <li>Instant results with explanations</li>
-                            <li>Score out of 10</li>
-                        </ul>
-                    </div>
-
                     <div class="d-grid">
-                        <button type="submit" class="btn btn-primary btn-lg" id="generateBtn">
-                            <i class="fas fa-magic me-2"></i>Generate Quiz with AI
-                        </button>
+                        <button type="submit" class="btn btn-primary btn-lg" id="generateBtn">Generate Quiz</button>
                     </div>
                 </form>
-            </div>
-        </div>
-
-        <!-- Popular Topics Suggestions -->
-        <div class="card mt-4">
-            <div class="card-header">
-                <h6 class="mb-0"><i class="fas fa-lightbulb me-2"></i>Popular Topics</h6>
-            </div>
-            <div class="card-body">
-                <div class="d-flex flex-wrap gap-2">
-                    <button type="button" class="btn btn-sm btn-outline-primary topic-suggestion" data-topic="World History">
-                        World History
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-primary topic-suggestion" data-topic="Python Programming">
-                        Python Programming
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-primary topic-suggestion" data-topic="Mathematics">
-                        Mathematics
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-primary topic-suggestion" data-topic="Biology">
-                        Biology
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-primary topic-suggestion" data-topic="Physics">
-                        Physics
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-primary topic-suggestion" data-topic="Literature">
-                        Literature
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-primary topic-suggestion" data-topic="Geography">
-                        Geography
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline-primary topic-suggestion" data-topic="Chemistry">
-                        Chemistry
-                    </button>
-                </div>
             </div>
         </div>
     </div>
@@ -117,62 +61,19 @@
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('createQuizForm');
     const generateBtn = document.getElementById('generateBtn');
-    const topicInput = document.getElementById('topic');
     
-    // Handle topic suggestions
-    document.querySelectorAll('.topic-suggestion').forEach(btn => {
-        btn.addEventListener('click', function() {
-            topicInput.value = this.dataset.topic;
-            topicInput.focus();
-        });
-    });
-    
-    // Form submission
     form.addEventListener('submit', function(e) {
-        const topic = topicInput.value.trim();
-        const difficulty = document.querySelector('input[name="difficulty"]:checked').value;
+        const topic = document.getElementById('topic').value.trim();
         
         if (!topic) {
             e.preventDefault();
-            showAlert('Please enter a topic for your quiz', 'danger');
             return;
         }
         
-        if (topic.length < 3) {
-            e.preventDefault();
-            showAlert('Topic must be at least 3 characters long', 'danger');
-            return;
-        }
-        
-        // Show loading state
-        generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Generating Quiz...';
+        generateBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Generating...';
         generateBtn.disabled = true;
-        
-        // Show loading overlay
         document.getElementById('loadingOverlay').classList.remove('d-none');
     });
 });
-
-function showAlert(message, type) {
-    const alertContainer = document.createElement('div');
-    alertContainer.innerHTML = `
-        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    `;
-    
-    const form = document.getElementById('createQuizForm');
-    form.parentNode.insertBefore(alertContainer, form);
-    
-    // Auto dismiss after 5 seconds
-    setTimeout(() => {
-        const alert = alertContainer.querySelector('.alert');
-        if (alert) {
-            const bsAlert = new bootstrap.Alert(alert);
-            bsAlert.close();
-        }
-    }, 5000);
-}
 </script>
 {% endblock %}

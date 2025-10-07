@@ -129,7 +129,8 @@ def submit_quiz(quiz_id):
             'total_questions': len(questions),
             'percentage': round((score / len(questions)) * 100, 1),
             'results': detailed_results,
-            'result_id': quiz_result.id
+            'result_id': quiz_result.id,
+            'redirect_url': url_for('quiz.view_results', result_id=quiz_result.id)
         })
         
     except Exception as e:
