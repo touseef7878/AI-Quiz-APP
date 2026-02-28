@@ -317,4 +317,4 @@ For issues, questions, or suggestions:
 
 ---
 
-**Made with ❤️ and Touseef**
+**Made with ❤️ by Touseef**
