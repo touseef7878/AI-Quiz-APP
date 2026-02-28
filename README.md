@@ -291,11 +291,6 @@ Contributions are welcome! Please follow these steps:
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 🐛 Known Issues
-
-- Fallback quiz generation creates sample questions when AI is unavailable
-- Quiz generation may take 5-10 seconds depending on topic complexity
-
 ## 🔮 Future Enhancements
 
 - [ ] Multiple quiz formats (True/False, Fill in the blanks)
@@ -311,7 +306,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 For issues, questions, or suggestions:
 - Open an issue on GitHub
-- Contact: [your-email@example.com]
+- Contact: [touseefurrehman554@gmail.com]
 
 ## 🙏 Acknowledgments
 
@@ -322,4 +317,4 @@ For issues, questions, or suggestions:
 
 ---
 
-**Made with ❤️ and AI**
+**Made with ❤️ and Touseef**
