@@ -1,14 +1,19 @@
 import json
-import google.generativeai as genai
+from google import genai
 from flask import current_app
 from models import Quiz, Question, db
 
 class AIQuizGenerator:
     def __init__(self):
         self.client = None
-        if current_app.config.get('GEMINI_API_KEY'):
-            genai.configure(api_key=current_app.config['GEMINI_API_KEY'])
-            self.client = genai
+        api_key = current_app.config.get('GEMINI_API_KEY')
+        
+        if api_key and api_key != 'your-new-api-key-here':
+            try:
+                self.client = genai.Client(api_key=api_key)
+            except Exception as e:
+                current_app.logger.error(f"Failed to initialize Gemini client: {e}")
+                self.client = None
     
     def generate_quiz_prompt(self, topic, difficulty):
         difficulty_descriptions = {
@@ -87,8 +92,10 @@ Number of questions: 10"""
             prompt = self.generate_quiz_prompt(topic, difficulty)
             
             # Call Gemini API
-            model = self.client.GenerativeModel('gemini-2.0-flash')
-            response = model.generate_content(prompt)
+            response = self.client.models.generate_content(
+                model='gemini-3-flash-preview',
+                contents=prompt
+            )
             
             response_text = response.text
             questions_data = self.parse_ai_response(response_text)
@@ -99,7 +106,7 @@ Number of questions: 10"""
             # Create quiz in database
             quiz = Quiz(topic=topic, difficulty=difficulty)
             db.session.add(quiz)
-            db.session.flush()  # Get the quiz ID
+            db.session.flush()
             
             # Create questions
             for i, q_data in enumerate(questions_data, 1):
@@ -132,6 +139,7 @@ Number of questions: 10"""
         db.session.flush()
         
         # Sample questions - in production, you'd want a better fallback
+        quiz_questions_count = current_app.config.get('QUIZ_QUESTIONS_COUNT', 10)
         sample_questions = [
             {
                 "question_text": f"This is a sample {difficulty} question about {topic}. What is the main concept?",
