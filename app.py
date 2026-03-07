@@ -1,3 +1,4 @@
+import os
 from flask import Flask, render_template
 from flask_login import LoginManager
 from flask_migrate import Migrate
@@ -7,6 +8,10 @@ from models import db, User
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+    
+    # Ensure instance folder exists for SQLite
+    instance_path = os.path.join(os.path.dirname(__file__), 'instance')
+    os.makedirs(instance_path, exist_ok=True)
     
     # Initialize extensions
     db.init_app(app)
